@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <title>Array</title>
+  <!-- cells -->
+  <rect x="10" y="36" width="22" height="28" rx="4"></rect>
+  <rect x="36" y="36" width="22" height="28" rx="4"></rect>
+  <rect x="62" y="36" width="22" height="28" rx="4"></rect>
+  <rect x="88" y="36" width="22" height="28" rx="4"></rect>
+  <!-- index ticks -->
+  <line x1="21" y1="70" x2="21" y2="80"></line>
+  <line x1="47" y1="70" x2="47" y2="80"></line>
+  <line x1="73" y1="70" x2="73" y2="80"></line>
+  <line x1="99" y1="70" x2="99" y2="80"></line>
+  <!-- base line for indices -->
+  <line x1="10" y1="82" x2="110" y2="82"></line>
+</svg>

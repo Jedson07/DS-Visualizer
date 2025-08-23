@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'linear_non_linear_page.dart';
+
 
 // ------------------- HOME PAGE -------------------
 class HomePage extends StatelessWidget {
@@ -69,6 +71,12 @@ class HomePage extends StatelessWidget {
               ),
               onPressed: () {
                 // TODO: Navigate to simulator page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LinearNonLinearPage(),
+                  ),
+                );
               },
             ),
           ],
@@ -112,7 +120,7 @@ class TreePainter extends CustomPainter {
       rightMid,
       leftBottom,
       midBottom,
-      rightBottom
+      rightBottom,
     ]) {
       canvas.drawCircle(point, 10, paintNode);
     }

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <title>Queue</title>
+  <!-- cells -->
+  <rect x="18" y="40" width="20" height="24" rx="4"></rect>
+  <rect x="42" y="40" width="20" height="24" rx="4"></rect>
+  <rect x="66" y="40" width="20" height="24" rx="4"></rect>
+  <rect x="90" y="40" width="20" height="24" rx="4"></rect>
+  <!-- FRONT label arrow (dequeue) -->
+  <line x1="18" y1="86" x2="18" y2="72"></line>
+  <polyline points="12,78 18,72 24,78"></polyline>
+  <text x="18" y="102" font-family="monospace" font-size="12" text-anchor="middle" fill="currentColor" stroke="none">FRONT</text>
+  <!-- REAR label arrow (enqueue) -->
+  <line x1="100" y1="86" x2="100" y2="72"></line>
+  <polyline points="94,78 100,72 106,78"></polyline>
+  <text x="100" y="102" font-family="monospace" font-size="12" text-anchor="middle" fill="currentColor" stroke="none">REAR</text>
+</svg>

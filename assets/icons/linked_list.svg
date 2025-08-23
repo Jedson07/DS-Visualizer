@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <title>Linked List</title>
+  <!-- node 1 -->
+  <rect x="10" y="36" width="28" height="24" rx="4"></rect>
+  <rect x="38" y="36" width="14" height="24" rx="4"></rect>
+  <!-- arrow 1->2 -->
+  <line x1="52" y1="48" x2="64" y2="48"></line>
+  <polyline points="58,42 64,48 58,54"></polyline>
+  <!-- node 2 -->
+  <rect x="64" y="36" width="28" height="24" rx="4"></rect>
+  <rect x="92" y="36" width="14" height="24" rx="4"></rect>
+  <!-- arrow 2->3 (null) -->
+  <line x1="106" y1="48" x2="116" y2="48"></line>
+  <circle cx="120" cy="48" r="2" fill="currentColor" stroke="none"></circle>
+</svg>
