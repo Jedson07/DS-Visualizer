@@ -58,7 +58,8 @@ flutter:
     - assets/icons/queue.svg
     - assets/icons/stack.svg
     - assets/icons/linked_list.svg
-
+    - assets/icons/tree.svg
+    - assets/icons/graph.svg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
