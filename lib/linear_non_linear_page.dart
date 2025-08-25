@@ -4,6 +4,7 @@ import 'tree_page.dart';
 import 'array_page.dart';
 import 'stack_page.dart';
 import 'queue_page.dart';
+import 'linkedlist_page.dart';
 
 class LinearNonLinearPage extends StatefulWidget {
   const LinearNonLinearPage({super.key});
@@ -68,7 +69,10 @@ class _LinearNonLinearPageState extends State<LinearNonLinearPage> {
                     );
                   }),
                   _buildOption(context, "LINKED LIST", 'assets/icons/linked_list.svg', () {
-                   
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LinkedListPage()),
+                    );
                   },
                   ),
                 ],

@@ -153,82 +153,85 @@ public class StackDemo {
   // ✅ Added: source code dialog
   void _showSourceDialog() {
     showDialog(
-      
       context: context,
       builder: (context) {
-
-        return StatefulBuilder(builder: (context, setStateDialog) {
-          return AlertDialog(
-            title: const Text("Stack Source Code"),
-            
-            content: SizedBox(
-              width: 600,
-              height: 420,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final lang in _sourceByLang.keys)
-                        ChoiceChip(
-                          label: Text(lang),
-                          selected: _selectedLang == lang,
-                          onSelected: (v) {
-                            if (v) setStateDialog(() => _selectedLang = lang);
-                          },
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Stack Source Code"),
+              content: SizedBox(
+                width:
+                    MediaQuery.of(context).size.width *0.8, // 🔹 increased width
+                height:
+                    MediaQuery.of(context).size.height *0.6, // 🔹 scaled height
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final lang in _sourceByLang.keys)
+                          ChoiceChip(
+                            label: Text(lang),
+                            selected: _selectedLang == lang,
+                            onSelected: (v) {
+                              if (v) setStateDialog(() => _selectedLang = lang);
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black26),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey.shade50,
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black26),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey.shade50,
-                      ),
-                      child: SingleChildScrollView(
-                        child: SelectableText(
-                          _sourceByLang[_selectedLang] ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 13,
-                            height: 1.35,
+                        child: SingleChildScrollView(
+                          child: SelectableText(
+                            _sourceByLang[_selectedLang] ?? '',
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
-              ),
-              FilledButton.icon(
-                icon: const Icon(Icons.copy),
-                label: const Text("Copy"),
-                onPressed: () async {
-                  final code = _sourceByLang[_selectedLang] ?? '';
-                  await Clipboard.setData(ClipboardData(text: code));
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Copied $_selectedLang code to clipboard"),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          );
-        });
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close"),
+                ),
+                FilledButton.icon(
+                  icon: const Icon(Icons.copy),
+                  label: const Text("Copy"),
+                  onPressed: () async {
+                    final code = _sourceByLang[_selectedLang] ?? '';
+                    await Clipboard.setData(ClipboardData(text: code));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Copied $_selectedLang code to clipboard",
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
