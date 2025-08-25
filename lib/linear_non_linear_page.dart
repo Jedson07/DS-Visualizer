@@ -56,16 +56,17 @@ class _LinearNonLinearPageState extends State<LinearNonLinearPage> {
                       MaterialPageRoute(builder: (_) => const ArrayPage()),
                     );
                   }),
-                  _buildOption(context, "QUEUE", 'assets/icons/queue.svg', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const QueuePage()),
-                    );
-                  }),
+                 
                   _buildOption(context, "STACK", 'assets/icons/stack.svg', () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const StackPage()),
+                    );
+                  }),
+                   _buildOption(context, "QUEUE", 'assets/icons/queue.svg', () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const QueuePage()),
                     );
                   }),
                   _buildOption(context, "LINKED LIST", 'assets/icons/linked_list.svg', () {

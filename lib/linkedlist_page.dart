@@ -577,7 +577,7 @@ class _LinkedListPageState extends State<LinkedListPage> {
                 child: Row(children: _buildLinkedListVisual()),
               ),
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 180),
             _buildNote(),
           ],
         ),

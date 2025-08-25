@@ -13,8 +13,7 @@ class _ArrayPageState extends State<ArrayPage> {
   int currentIndex = -1; // pointer starts before the first element
   Timer? timer;
 
-  void startVisualization() {
-    currentIndex = -1;
+  void startTraversal() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       setState(() {
@@ -24,6 +23,17 @@ class _ArrayPageState extends State<ArrayPage> {
           t.cancel();
         }
       });
+    });
+  }
+
+  void pauseTraversal() {
+    timer?.cancel();
+  }
+
+  void resetTraversal() {
+    timer?.cancel();
+    setState(() {
+      currentIndex = -1;
     });
   }
 
@@ -160,25 +170,35 @@ class _ArrayPageState extends State<ArrayPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: startVisualization,
+                ElevatedButton.icon(
+                  onPressed: startTraversal,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text("Play"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(120, 45),
+                    minimumSize: const Size(100, 45),
                   ),
-                  child: const Text("Visualize"),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Add "Try Yourself" logic
-                  },
+                ElevatedButton.icon(
+                  onPressed: pauseTraversal,
+                  icon: const Icon(Icons.pause),
+                  label: const Text("Pause"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(100, 45),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: resetTraversal,
+                  icon: const Icon(Icons.replay),
+                  label: const Text("Reset"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(120, 45),
+                    minimumSize: const Size(100, 45),
                   ),
-                  child: const Text("Try Yourself"),
                 ),
               ],
             ),
