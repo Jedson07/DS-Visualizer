@@ -3,9 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'tree_page.dart';
 import 'array_page.dart';
 import 'stack_page.dart';
+import 'queue_page.dart';
 
-class LinearNonLinearPage extends StatelessWidget {
+class LinearNonLinearPage extends StatefulWidget {
   const LinearNonLinearPage({super.key});
+
+  @override
+  State<LinearNonLinearPage> createState() => _LinearNonLinearPageState();
+}
+
+class _LinearNonLinearPageState extends State<LinearNonLinearPage> {
+  bool _linearExpanded = false;
+  bool _nonLinearExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,120 +33,164 @@ class LinearNonLinearPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 16), // top spacing
+            // --- Linear DS (LEFT aligned) ---
+            Align(
+              alignment: Alignment.topLeft,
+              child: _buildExpandableButton(
+                "LINEAR DATA STRUCTURES",
+                _linearExpanded,
+                () {
+                  setState(() {
+                    _linearExpanded = !_linearExpanded;
+                  });
+                },
+                [
+                  _buildOption(context, "ARRAY", 'assets/icons/array.svg', () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ArrayPage()),
+                    );
+                  }),
+                  _buildOption(context, "QUEUE", 'assets/icons/queue.svg', () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const QueuePage()),
+                    );
+                  }),
+                  _buildOption(context, "STACK", 'assets/icons/stack.svg', () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const StackPage()),
+                    );
+                  }),
+                  _buildOption(context, "LINKED LIST", 'assets/icons/linked_list.svg', () {
+                   
+                  },
+                  ),
+                ],
+              ),
+            ),
 
-            // --- Linear DS Section Heading ---
-            _buildGradientHeading("LINEAR DATA STRUCTURES"),
+            const SizedBox(height: 40),
 
-            // linear options (no extra spacing before them)
-            _buildOption(context, "ARRAY", 'assets/icons/array.svg', () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ArrayPage()),
-              );
-            }),
-            const SizedBox(height: 10),
-            _buildOption(context, "QUEUE", 'assets/icons/queue.svg', () {}),
-            const SizedBox(height: 10),
-            _buildOption(context, "STACK", 'assets/icons/stack.svg', () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StackPage()),
-              );
-            }),
-            const SizedBox(height: 10),
-            _buildOption(
-                context, "LINKED LIST", 'assets/icons/linked_list.svg', () {}),
-
-            const SizedBox(height: 32), // spacing ONLY before Non-Linear
-
-            // --- Non Linear DS Section Heading ---
-            _buildGradientHeading("NON-LINEAR DATA STRUCTURES"),
-
-            // non-linear options
-            _buildOption(context, "TREE", "assets/icons/tree.svg", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TreePage()),
-              );
-            }),
-            const SizedBox(height: 10),
-            _buildOption(context, "GRAPH", "assets/icons/graph.svg", () {
-              // TODO: Navigate to Graph page later
-            }),
+            // --- Non Linear DS (RIGHT aligned) ---
+            Align(
+              alignment: Alignment.bottomRight,
+              child: _buildExpandableButton(
+                "NON-LINEAR DATA STRUCTURES",
+                _nonLinearExpanded,
+                () {
+                  setState(() {
+                    _nonLinearExpanded = !_nonLinearExpanded;
+                  });
+                },
+                [
+                  _buildOption(context, "TREE", "assets/icons/tree.svg", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TreePage()),
+                    );
+                  }),
+                  _buildOption(context, "GRAPH", "assets/icons/graph.svg", () {
+                    
+                  }),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Gradient heading button
-  Widget _buildGradientHeading(String title) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 12), // slight breathing room
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2196F3), Color(0xFF0D47A1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 6,
-            offset: const Offset(2, 4),
+  // 🔹 Custom expandable button
+  Widget _buildExpandableButton(
+    String title,
+    bool expanded,
+    VoidCallback onTap,
+    List<Widget> children,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 250, // Fixed width (not full screen)
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 26),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade700,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Icon(
+                  expanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: Colors.white,
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: 1.1,
-          ),
         ),
-      ),
+        if (expanded) ...children,
+      ],
     );
   }
 
-  // Reusable option button
+  // 🔹 Reusable option button
   Widget _buildOption(
-      BuildContext context, String title, String svgPath, VoidCallback onTap) {
+    BuildContext context,
+    String title,
+    String svgPath,
+    VoidCallback onTap,
+  ) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4), // keeps spacing uniform
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      width: 200, // smaller fixed width
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
-          minimumSize: const Size(double.infinity, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 3,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(svgPath,
-                width: 26, height: 26, color: Colors.black87),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+            SvgPicture.asset(
+              svgPath,
+              width: 24,
+              height: 24,
+              color: Colors.black87,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
             ),
           ],

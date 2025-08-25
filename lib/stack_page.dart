@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // ✅ for Clipboard
 
 class StackPage extends StatefulWidget {
   const StackPage({super.key});
@@ -12,6 +13,225 @@ class _StackPageState extends State<StackPage> {
   final TextEditingController _controller = TextEditingController();
   String _message = "";
   final int _maxSize = 7; // Fixed size stack
+
+  // ✅ Added: language -> source mapping
+  final Map<String, String> _sourceByLang = const {
+    'Python': r'''
+MAX = 7
+
+class Stack:
+    def __init__(self):
+        self.data = []
+
+    def is_empty(self):
+        return len(self.data) == 0
+
+    def is_full(self):
+        return len(self.data) >= MAX
+
+    def push(self, x):
+        if self.is_full():
+            raise OverflowError("STACK OVERFLOW")
+        self.data.append(x)
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("STACK UNDERFLOW")
+        return self.data.pop()
+
+    def peek(self):
+        if self.is_empty():
+            return None
+        return self.data[-1]
+
+if __name__ == "__main__":
+    s = Stack()
+    s.push(10); s.push(20); s.push(30)
+    print("Top:", s.peek())
+    print("Pop:", s.pop())
+    print("Top after pop:", s.peek())
+''',
+    'C': r'''
+#include <stdio.h>
+#define MAX 7
+
+int stack[MAX];
+int top = -1;
+
+int isEmpty() { return top == -1; }
+int isFull()  { return top == MAX - 1; }
+
+void push(int x) {
+    if (isFull()) { printf("STACK OVERFLOW\n"); return; }
+    stack[++top] = x;
+}
+
+int pop() {
+    if (isEmpty()) { printf("STACK UNDERFLOW\n"); return -1; }
+    return stack[top--];
+}
+
+int peek() {
+    if (isEmpty()) { return -1; }
+    return stack[top];
+}
+
+int main() {
+    push(10); push(20); push(30);
+    printf("Top: %d\n", peek());
+    printf("Pop: %d\n", pop());
+    printf("Top after pop: %d\n", peek());
+    return 0;
+}
+''',
+    'C++': r'''
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Stack {
+    static const int MAX = 7;
+    vector<int> a;
+    bool empty() const { return a.empty(); }
+    bool full()  const { return (int)a.size() >= MAX; }
+    void push(int x) {
+        if (full()) { cout << "STACK OVERFLOW\n"; return; }
+        a.push_back(x);
+    }
+    int pop() {
+        if (empty()) { cout << "STACK UNDERFLOW\n"; return -1; }
+        int v = a.back(); a.pop_back(); return v;
+    }
+    int peek() const { return empty() ? -1 : a.back(); }
+};
+
+int main() {
+    Stack s;
+    s.push(10); s.push(20); s.push(30);
+    cout << "Top: " << s.peek() << "\n";
+    cout << "Pop: " << s.pop() << "\n";
+    cout << "Top after pop: " << s.peek() << "\n";
+    return 0;
+}
+''',
+    'Java': r'''
+public class StackDemo {
+    static class IntStack {
+        private static final int MAX = 7;
+        private final int[] a = new int[MAX];
+        private int top = -1;
+
+        boolean isEmpty() { return top == -1; }
+        boolean isFull()  { return top == MAX - 1; }
+
+        void push(int x) {
+            if (isFull()) { System.out.println("STACK OVERFLOW"); return; }
+            a[++top] = x;
+        }
+
+        int pop() {
+            if (isEmpty()) { System.out.println("STACK UNDERFLOW"); return -1; }
+            return a[top--];
+        }
+
+        int peek() { return isEmpty() ? -1 : a[top]; }
+    }
+
+    public static void main(String[] args) {
+        IntStack s = new IntStack();
+        s.push(10); s.push(20); s.push(30);
+        System.out.println("Top: " + s.peek());
+        System.out.println("Pop: " + s.pop());
+        System.out.println("Top after pop: " + s.peek());
+    }
+}
+''',
+  };
+
+  // ✅ Added: selected language for dialog
+  String _selectedLang = 'Python';
+
+  // ✅ Added: source code dialog
+  void _showSourceDialog() {
+    showDialog(
+      
+      context: context,
+      builder: (context) {
+
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text("Stack Source Code"),
+            
+            content: SizedBox(
+              width: 600,
+              height: 420,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final lang in _sourceByLang.keys)
+                        ChoiceChip(
+                          label: Text(lang),
+                          selected: _selectedLang == lang,
+                          onSelected: (v) {
+                            if (v) setStateDialog(() => _selectedLang = lang);
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black26),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey.shade50,
+                      ),
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          _sourceByLang[_selectedLang] ?? '',
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+              FilledButton.icon(
+                icon: const Icon(Icons.copy),
+                label: const Text("Copy"),
+                onPressed: () async {
+                  final code = _sourceByLang[_selectedLang] ?? '';
+                  await Clipboard.setData(ClipboardData(text: code));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Copied $_selectedLang code to clipboard"),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
 
   void _push() {
     if (_controller.text.isEmpty) {
@@ -65,19 +285,46 @@ class _StackPageState extends State<StackPage> {
     });
   }
 
+  void _refresh() {
+    setState(() {
+      _stack.clear(); // clear the stack
+      _message = ""; // reset message
+      _controller.clear(); // clear input field
+    });
+  }
+
+  Widget _buildNote() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: 8,
+        horizontal: 10,
+      ), // reduced padding
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black54),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Text(
+        "NOTE:\n"
+        "1. PUSH → Insert element at TOP of the stack.\n"
+        "2. POP → Remove element from TOP of the stack.\n"
+        "3. PEEK → Shows the TOP element without removing it.\n"
+        "4. Stack follows LIFO (Last In, First Out) principle.\n"
+        "5. Maximum stack size = 7 (Overflow occurs if exceeded).",
+        style: TextStyle(fontSize: 14),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0A0A4F),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Stack Visualizer",
@@ -85,9 +332,18 @@ class _StackPageState extends State<StackPage> {
         ),
         centerTitle: true,
         actions: [
+          // 🔄 Refresh button
           IconButton(
-            icon: const Icon(Icons.exit_to_app, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _refresh,
+          ),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
           ),
         ],
       ),
@@ -106,6 +362,16 @@ class _StackPageState extends State<StackPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+
+            // ✅ NEW: Source Code option
+            ListTile(
+              leading: const Icon(Icons.code),
+              title: const Text("Source Code"),
+              onTap: () {
+                Navigator.pop(context);
+                _showSourceDialog();
+              },
             ),
 
             // Pseudocode
@@ -169,10 +435,11 @@ class _StackPageState extends State<StackPage> {
         ),
       ),
 
-      // 🔹 Body (your stack visualizer UI)
-      body: Padding(
-        padding: const EdgeInsets.all(14),
+      //  Body (your stack visualizer UI)
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
@@ -194,26 +461,17 @@ class _StackPageState extends State<StackPage> {
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: _push,
-                  child: const Text("PUSH"),
-                ),
-                ElevatedButton(
-                  onPressed: _pop,            
-                  child: const Text("POP"),
-                ),
-                ElevatedButton(
-                  onPressed: _peek,
-                  child: const Text("PEEK"),
-                ),
+                ElevatedButton(onPressed: _push, child: const Text("PUSH")),
+                ElevatedButton(onPressed: _pop, child: const Text("POP")),
+                ElevatedButton(onPressed: _peek, child: const Text("PEEK")),
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 1),
             Text(
               _message,
               style: const TextStyle(
@@ -223,9 +481,13 @@ class _StackPageState extends State<StackPage> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
-            Expanded(
+            // Wrap the stack visualization in ConstrainedBox to avoid overflow
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.38,
+              ),
               child: Center(
                 child: _stack.isEmpty
                     ? const Text(
@@ -256,7 +518,7 @@ class _StackPageState extends State<StackPage> {
                                   ),
                                 );
                               } else {
-                                return const SizedBox(height: 50);
+                                return const SizedBox(height: 31);
                               }
                             }),
                           ),
@@ -272,10 +534,11 @@ class _StackPageState extends State<StackPage> {
                                   final isTop = index == 0;
                                   return Container(
                                     margin: const EdgeInsets.symmetric(
-                                      vertical: 4,
+                                      vertical: 1,
                                     ),
-                                    padding: const EdgeInsets.all(6),
-                                    width: 100,
+                                    padding: const EdgeInsets.all(4),
+                                    height: 30,
+                                    width: 120,
                                     decoration: BoxDecoration(
                                       color: isTop
                                           ? Colors.amber.shade300
@@ -312,14 +575,9 @@ class _StackPageState extends State<StackPage> {
               ),
             ),
 
+            const SizedBox(height: 70),
+            _buildNote(),
             const SizedBox(height: 10),
-            const Text(
-              "Note: Stack follows LIFO (Last In, First Out)\n"
-              "- PUSH adds at the TOP\n- POP removes from the TOP\n- PEEK shows the TOP element\n"
-              "- Max size = 7 (overflow if exceeded)",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
-            ),
           ],
         ),
       ),
