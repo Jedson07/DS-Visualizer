@@ -31,15 +31,34 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  int activeDot = 0;
+  Timer? dotTimer;
+
   @override
   void initState() {
     super.initState();
+
+    // Cycle through dots every 400ms
+    dotTimer = Timer.periodic(const Duration(milliseconds: 400), (timer) {
+      setState(() {
+        activeDot = (activeDot + 1) % 3; // Loop between 0,1,2
+      });
+    });
+
+    // After 3 seconds go to HomePage
     Timer(const Duration(seconds: 3), () {
+      dotTimer?.cancel();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     });
+  }
+
+  @override
+  void dispose() {
+    dotTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -78,29 +97,24 @@ class _SplashPageState extends State<SplashPage> {
             ),
             const SizedBox(height: 40),
 
+            // Animated dots row
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildDot(true),
-                const SizedBox(width: 8),
-                _buildDot(false),
-                const SizedBox(width: 8),
-                _buildDot(false),
-              ],
+              children: List.generate(3, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  height: 10,
+                  width: activeDot == index ? 20 : 10,
+                  decoration: BoxDecoration(
+                    color: activeDot == index ? Colors.white : Colors.white54,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                );
+              }),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDot(bool isActive) {
-    return Container(
-      height: 10,
-      width: 10,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white : Colors.white54,
-        shape: BoxShape.circle,
       ),
     );
   }
