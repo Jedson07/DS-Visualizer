@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bst_page.dart';
 
 class TreePage extends StatelessWidget {
   const TreePage({super.key});
@@ -25,7 +26,10 @@ class TreePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildButton("Binary Search Tree (BST)", () {
-              // TODO: Navigate to BST page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BSTPage()),
+              );
             }),
             const SizedBox(height: 20),
             _buildButton("AVL Tree", () {

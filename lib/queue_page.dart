@@ -122,7 +122,7 @@ class Queue {
         else System.out.println("Front: " + arr[front]);
     }
 }
-'''
+''',
   };
 
   @override
@@ -167,7 +167,9 @@ class Queue {
       return;
     }
     if (_rearL == _maxSize - 1) {
-      setState(() => _messageL = "QUEUE OVERFLOW (Linear): Cannot insert more!");
+      setState(
+        () => _messageL = "QUEUE OVERFLOW (Linear): Cannot insert more!",
+      );
       _controller.clear();
       return;
     }
@@ -269,53 +271,120 @@ class Queue {
   }
 
   // 🔹 Visualization Helper
-  Widget _buildQueueVisualizer(List<int?> queue, int front, int rear,
-      {required bool isCircular}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_maxSize, (i) {
-        final isFront =
-            i == front && (isCircular ? front != -1 : front <= rear);
-        final isRear = i == rear && (isCircular ? rear != -1 : rear >= front);
+  Widget _buildQueueVisualizer(
+    List<int?> queue,
+    int front,
+    int rear, {
+    required bool isCircular,
+  }) {
+    const double boxSize = 40; // reduced size
+    const double boxMargin = 1;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: const EdgeInsets.all(8),
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: queue[i] != null ? Colors.amber.shade200 : Colors.white,
-                border: Border.all(color: Colors.black, width: 1.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  queue[i]?.toString() ?? "",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Front pointers row
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_maxSize, (i) {
+              bool showFront = (i == front);
+              return SizedBox(
+                width: boxSize + boxMargin * 2,
+                child: Column(
+                  children: [
+                    showFront
+                        ? const Text(
+                            "Front",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          )
+                        : const SizedBox(height: 14),
+                    showFront
+                        ? const Text(
+                            "↓",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : const SizedBox(height: 14),
+                  ],
                 ),
-              ),
-            ),
-            Column(
-              children: [
-                if (isFront)
-                  const Text("↑ Front",
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
-                if (isRear)
-                  const Text("↑ Rear",
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
-              ],
-            ),
-          ],
-        );
-      }),
+              );
+            }),
+          ),
+        ),
+
+        // Queue boxes row (scrollable)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_maxSize, (i) {
+              return Container(
+                margin: const EdgeInsets.all(boxMargin),
+                width: boxSize,
+                height: boxSize,
+                decoration: BoxDecoration(
+                  color: queue[i] != null
+                      ? Colors.amber.shade200
+                      : Colors.white,
+                  border: Border.all(color: Colors.black, width: 1.5),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Center(
+                  child: Text(
+                    queue[i]?.toString() ?? "",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        // Rear pointers row
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_maxSize, (i) {
+              bool showRear = (i == rear);
+              return SizedBox(
+                width: boxSize + boxMargin * 2,
+                child: Column(
+                  children: [
+                    showRear
+                        ? const Text(
+                            "↑",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : const SizedBox(height: 14),
+                    showRear
+                        ? const Text(
+                            "Rear",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          )
+                        : const SizedBox(height: 14),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
     );
   }
 
@@ -325,66 +394,70 @@ class Queue {
       context: context,
       builder: (context) {
         String selectedLang = "Python";
-        return StatefulBuilder(builder: (context, setStateDialog) {
-          return AlertDialog(
-            title: const Text("Queue Source Code"),
-            content: SizedBox(
-              width: 600,
-              height: 420,
-              child: Column(
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    children: _queueSourceCodes.keys.map((lang) {
-                      return ChoiceChip(
-                        label: Text(lang),
-                        selected: selectedLang == lang,
-                        onSelected: (val) {
-                          if (val) setStateDialog(() => selectedLang = lang);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          border: Border.all(color: Colors.black54),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: SelectableText(
-                          _queueSourceCodes[selectedLang]!,
-                          style: const TextStyle(
-                            fontFamily: "monospace",
-                            fontSize: 14,
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Queue Source Code"),
+              content: SizedBox(
+                width: 600,
+                height: 420,
+                child: Column(
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      children: _queueSourceCodes.keys.map((lang) {
+                        return ChoiceChip(
+                          label: Text(lang),
+                          selected: selectedLang == lang,
+                          onSelected: (val) {
+                            if (val) setStateDialog(() => selectedLang = lang);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            border: Border.all(color: Colors.black54),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: SelectableText(
+                            _queueSourceCodes[selectedLang]!,
+                            style: const TextStyle(
+                              fontFamily: "monospace",
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Clipboard.setData(
-                      ClipboardData(text: _queueSourceCodes[selectedLang]!));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("$selectedLang code copied!")));
-                },
-                child: const Text("COPY"),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("CLOSE"),
-              ),
-            ],
-          );
-        });
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: _queueSourceCodes[selectedLang]!),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("$selectedLang code copied!")),
+                    );
+                  },
+                  child: const Text("COPY"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("CLOSE"),
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -402,14 +475,16 @@ class Queue {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text("Queue Visualizer",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text(
+            "Queue Visualizer",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           centerTitle: true,
           actions: [
             IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: _refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              onPressed: _refresh,
+            ),
             Builder(
               builder: (context) => IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white),
@@ -421,7 +496,10 @@ class Queue {
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
-            tabs: [Tab(text: "Linear Queue"), Tab(text: "Circular Queue")],
+            tabs: [
+              Tab(text: "Linear Queue"),
+              Tab(text: "Circular Queue"),
+            ],
           ),
         ),
         body: TabBarView(
@@ -441,12 +519,17 @@ class Queue {
           const SizedBox(height: 1),
           _actionRow(_enqueueLinear, _dequeueLinear, _peekLinear),
           const SizedBox(height: 6),
-          Text(_messageL,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(
+            _messageL,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 16),
-          _buildQueueVisualizer(_linearQueue, _frontL, _rearL,
-              isCircular: false),
+          _buildQueueVisualizer(
+            _linearQueue,
+            _frontL,
+            _rearL,
+            isCircular: false,
+          ),
           const SizedBox(height: 10),
           _buildNote(),
         ],
@@ -464,12 +547,17 @@ class Queue {
           const SizedBox(height: 1),
           _actionRow(_enqueueCircular, _dequeueCircular, _peekCircular),
           const SizedBox(height: 6),
-          Text(_messageC,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(
+            _messageC,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 16),
-          _buildQueueVisualizer(_circularQueue, _frontC, _rearC,
-              isCircular: true),
+          _buildQueueVisualizer(
+            _circularQueue,
+            _frontC,
+            _rearC,
+            isCircular: true,
+          ),
           const SizedBox(height: 10),
           _buildNote(),
         ],
@@ -489,7 +577,8 @@ class Queue {
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
@@ -497,7 +586,11 @@ class Queue {
     );
   }
 
-  Widget _actionRow(VoidCallback enqueue, VoidCallback dequeue, VoidCallback peek) {
+  Widget _actionRow(
+    VoidCallback enqueue,
+    VoidCallback dequeue,
+    VoidCallback peek,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -515,11 +608,14 @@ class Queue {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Color(0xFF0A0A4F)),
-            child: Text("📘 Queue Information",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
+            child: Text(
+              "📘 Queue Information",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           ExpansionTile(
             leading: const Icon(Icons.code),
@@ -551,11 +647,13 @@ class Queue {
             title: const Text("Time Complexity"),
             children: const [
               ListTile(
-                title: Text("ENQUEUE → O(1)\n"
-                    "DEQUEUE → O(1)\n"
-                    "PEEK → O(1)\n"
-                    "isEmpty → O(1)\n"
-                    "isFull → O(1)"),
+                title: Text(
+                  "ENQUEUE → O(1)\n"
+                  "DEQUEUE → O(1)\n"
+                  "PEEK → O(1)\n"
+                  "isEmpty → O(1)\n"
+                  "isFull → O(1)",
+                ),
               ),
             ],
           ),
@@ -595,7 +693,7 @@ class Queue {
       child: const Text(
         " NOTE:\n"
         "1. Enqueue → Insert element at REAR.\n"
-         "2. Dequeue → Remove element from FRONT.\n"
+        "2. Dequeue → Remove element from FRONT.\n"
         "3. Linear Queue → Wastes space after deletions.\n"
         "4. Circular Queue → Efficient, reuses freed space.\n",
         style: TextStyle(fontSize: 14),
