@@ -83,8 +83,6 @@ class _BSTPageState extends State<BSTPage> {
     await Future.delayed(const Duration(milliseconds: 700));
     targetNode = null;
     isAnimating = false;
-
-    
   }
 
   Future<BSTNode?> _searchAnimated(BSTNode? node, int value) async {
@@ -143,45 +141,35 @@ class _BSTPageState extends State<BSTPage> {
     while (node.left != null) node = node.left!;
     return node;
   }
-  
+
   // ------------------ TRAVERSALS ------------------
   Future<void> _traverseAnimated(String type) async {
-  if (root == null || isAnimating) return;
-  isAnimating = true;
-  highlightedNodes.clear();
-  targetNode = null;
+    if (root == null || isAnimating) return;
 
-  List<BSTNode> traversal = [];
-  switch (type) {
-    case 'Inorder':
-      _inorder(root, traversal);
-      break;
-    case 'Preorder':
-      _preorder(root, traversal);
-      break;
-    case 'Postorder':
-      _postorder(root, traversal);
-      break;
+    isAnimating = true;
+    highlightedNodes.clear();
+    targetNode = null;
+
+    List<BSTNode> traversal = [];
+    _collectTraversalNodes(root, type, traversal);
+
+    message = "$type Traversal: ";
+    setState(() {});
+
+    for (var node in traversal) {
+      highlightedNodes = [node];
+      message = "$type Traversal: ${node.value}";
+      setState(() {});
+      await Future.delayed(const Duration(milliseconds: 700));
+    }
+
+    highlightedNodes.clear();
+    message =
+        "$type Traversal Completed: ${traversal.map((n) => n.value).join(', ')}";
+    setState(() {});
+    isAnimating = false;
   }
 
-  List<int> visitedValues = [];
-  message = "🔄 $type Traversal in progress...";
-  setState(() {});
-
-  for (var node in traversal) {
-    highlightedNodes = [node];
-    visitedValues.add(node.value);
-    setState(() {
-      message = "$type Traversal: ${visitedValues.join(', ')}";
-    });
-    await Future.delayed(const Duration(milliseconds: 700));
-  }
-
-  highlightedNodes.clear();
-  
-  setState(() {});
-  isAnimating = false;
-}
   void _inorder(BSTNode? node, List<BSTNode> res) {
     if (node == null) return;
     _inorder(node.left, res);
@@ -202,89 +190,27 @@ class _BSTPageState extends State<BSTPage> {
     _postorder(node.right, res);
     res.add(node);
   }
-  void _showSourceDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text("Stack Source Code"),
-              content: SizedBox(
-                width:
-                    MediaQuery.of(context).size.width *0.8, // 🔹 increased width
-                height:
-                    MediaQuery.of(context).size.height *0.6, // 🔹 scaled height
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final lang in _sourceByLang.keys)
-                          ChoiceChip(
-                            label: Text(lang),
-                            selected: _selectedLang == lang,
-                            onSelected: (v) {
-                              if (v) setStateDialog(() => _selectedLang = lang);
-                            },
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black26),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.grey.shade50,
-                        ),
-                        child: SingleChildScrollView(
-                          child: SelectableText(
-                            _sourceByLang[_selectedLang] ?? '',
-                            style: const TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 13,
-                              height: 1.35,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Close"),
-                ),
-                FilledButton.icon(
-                  icon: const Icon(Icons.copy),
-                  label: const Text("Copy"),
-                  onPressed: () async {
-                    final code = _sourceByLang[_selectedLang] ?? '';
-                    await Clipboard.setData(ClipboardData(text: code));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Copied $_selectedLang code to clipboard",
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+
+  void _collectTraversalNodes(
+    BSTNode? node,
+    String type,
+    List<BSTNode> result,
+  ) {
+    if (node == null) return;
+
+    if (type == "Preorder") {
+      result.add(node);
+      _collectTraversalNodes(node.left, type, result);
+      _collectTraversalNodes(node.right, type, result);
+    } else if (type == "Inorder") {
+      _collectTraversalNodes(node.left, type, result);
+      result.add(node);
+      _collectTraversalNodes(node.right, type, result);
+    } else if (type == "Postorder") {
+      _collectTraversalNodes(node.left, type, result);
+      _collectTraversalNodes(node.right, type, result);
+      result.add(node);
+    }
   }
 
   // ------------------ UI ------------------
@@ -320,94 +246,6 @@ class _BSTPageState extends State<BSTPage> {
           ),
         ],
       ),
-drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF0A0A4F)),
-              child: Text(
-                "📘 Stack Information",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            //  NEW: Source Code option
-            ListTile(
-              leading: const Icon(Icons.code),
-              title: const Text("Source Code"),
-              onTap: () {
-                Navigator.pop(context);
-                _showSourceDialog();
-              },
-            ),
-
-            // Pseudocode
-            ExpansionTile(
-              leading: const Icon(Icons.code),
-              title: const Text("Pseudo Code"),
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text(
-                    "PUSH(x):\n"
-                    "  if isFull(stack) → OVERFLOW\n"
-                    "  else:\n"
-                    "    top ← top + 1\n"
-                    "    stack[top] ← x\n\n"
-                    "POP():\n"
-                    "  if isEmpty(stack) → UNDERFLOW\n"
-                    "  else:\n"
-                    "    return stack[top]\n"
-                    "    top ← top - 1\n\n"
-                    "PEEK():\n"
-                    "  if isEmpty(stack) → return null\n"
-                    "  else → return stack[top]",
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-              ],
-            ),
-
-            // Time Complexity
-            ExpansionTile(
-              leading: const Icon(Icons.timer),
-              title: const Text("Time Complexity"),
-              children: const [
-                ListTile(
-                  title: Text(
-                    "PUSH → O(1)\n"
-                    "POP → O(1)\n"
-                    "PEEK → O(1)\n"
-                    "isEmpty → O(1)\n"
-                    "isFull → O(1)",
-                  ),
-                ),
-              ],
-            ),
-
-            // Applications
-            ExpansionTile(
-              leading: const Icon(Icons.apps),
-              title: const Text("Applications"),
-              children: const [
-                ListTile(
-                  title: Text("👉 Expression Evaluation (Postfix/Infix)"),
-                ),
-                ListTile(title: Text("👉 Undo/Redo operations in editors")),
-                ListTile(title: Text("👉 Function call stack in recursion")),
-                ListTile(title: Text("👉 Balanced Parentheses checking")),
-              ],
-            ),
-          ],
-        ),
-      ),
-
-
       body: Column(
         children: [
           const SizedBox(height: 16),
@@ -479,7 +317,7 @@ drawer: Drawer(
                 child: const Text("PREORDER"),
               ),
               ElevatedButton(
-                 onPressed: () => _traverseAnimated("Inorder"),
+                onPressed: () => _traverseAnimated("Inorder"),
                 child: const Text("INORDER"),
               ),
               ElevatedButton(
@@ -564,7 +402,13 @@ class BSTPainter extends CustomPainter {
       ..strokeWidth = 2;
     final paintNode = Paint()..color = Colors.white;
 
-    void drawNode(BSTNode? node, double x, double y, double offsetX, int depth) {
+    void drawNode(
+      BSTNode? node,
+      double x,
+      double y,
+      double offsetX,
+      int depth,
+    ) {
       if (node == null) return;
       if (depth > maxDepth) {
         reachedMaxDepth = true;
@@ -608,7 +452,9 @@ class BSTPainter extends CustomPainter {
       );
       textPainter.layout();
       textPainter.paint(
-          canvas, Offset(x - textPainter.width / 2, y - textPainter.height / 2));
+        canvas,
+        Offset(x - textPainter.width / 2, y - textPainter.height / 2),
+      );
     }
 
     drawNode(root, size.width / 2, 60, size.width / 4, 1);
@@ -623,7 +469,9 @@ class BSTPainter extends CustomPainter {
       );
       warning.layout(maxWidth: size.width);
       warning.paint(
-          canvas, Offset((size.width - warning.width) / 2, size.height - 40));
+        canvas,
+        Offset((size.width - warning.width) / 2, size.height - 40),
+      );
     }
   }
 
